@@ -4,16 +4,8 @@
     "slug": "fralda-scanner",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "splash": {
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#000000"
-      },
       "package": "com.fraldascanner.app",
       "permissions": [
         "android.permission.CAMERA",
