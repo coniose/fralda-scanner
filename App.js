@@ -14,10 +14,10 @@ const BOX_TOP  = SH * 0.22;
 
 // ─── Labels flutuantes sobre o produto (padrão Cal AI) ───────────────────────
 const FLOAT_LABELS = [
-  { text: 'HUGGIES',   sub: 'Supreme Care',    rx: 0.03, ry: 0.05, color: '#FFD700', delay: 0   },
-  { text: 'R$ 59,90',  sub: 'PREÇO ATUAL',      rx: 0.56, ry: 0.05, color: '#00E5FF', delay: 220 },
-  { text: '84%',       sub: 'EFICIÊNCIA',        rx: 0.34, ry: 0.56, color: '#00FF87', delay: 440 },
-  { text: 'PREMIUM',   sub: 'FRALDA DESC.',      rx: 0.03, ry: 0.54, color: '#B388FF', delay: 660 },
+  { text: 'HUGGIES',   sub: 'Supreme Care',    rx: 0.03, ry: 0.05, color: '#CC785C', delay: 0   },
+  { text: 'R$ 59,90',  sub: 'PREÇO ATUAL',      rx: 0.56, ry: 0.05, color: '#6B8FBF', delay: 220 },
+  { text: '84%',       sub: 'EFICIÊNCIA',        rx: 0.34, ry: 0.56, color: '#5C9E77', delay: 440 },
+  { text: 'PREMIUM',   sub: 'FRALDA DESC.',      rx: 0.03, ry: 0.54, color: '#C9973A', delay: 660 },
 ];
 
 // ─── Dados mockados ───────────────────────────────────────────────────────────
@@ -26,12 +26,12 @@ const PRODUCT = {
   line: 'Supreme Care',
   type: 'FRALDA DESCARTÁVEL',
   rarity: 'PREMIUM',
-  rarityColor: '#FFD700',
+  rarityColor: '#C9973A',
   stats: [
-    { label: 'Absorção',        value: 94, color: '#00E5FF' },
-    { label: 'Maciez',          value: 88, color: '#B388FF' },
-    { label: 'Ajuste',          value: 85, color: '#69F0AE' },
-    { label: 'Custo-Benefício', value: 76, color: '#FF6E40' },
+    { label: 'Absorção',        value: 94, color: '#6B8FBF' },
+    { label: 'Maciez',          value: 88, color: '#A88CBF' },
+    { label: 'Ajuste',          value: 85, color: '#5C9E77' },
+    { label: 'Custo-Benefício', value: 76, color: '#CC785C' },
   ],
   efficiency: 84,
   price: 'R$ 59,90',
@@ -47,7 +47,7 @@ const NEARBY = [
     efficiency: 91,
     isBest: false,
     px: 0.68, py: 0.28,
-    color: '#00E5FF',
+    color: '#6B8FBF',
   },
   {
     name: 'Carrefour',
@@ -58,7 +58,7 @@ const NEARBY = [
     efficiency: 93,
     isBest: true,
     px: 0.22, py: 0.48,
-    color: '#00FF87',
+    color: '#5C9E77',
   },
   {
     name: 'Assaí Atacadista',
@@ -69,7 +69,7 @@ const NEARBY = [
     efficiency: 86,
     isBest: false,
     px: 0.74, py: 0.63,
-    color: '#B388FF',
+    color: '#A88CBF',
   },
 ];
 
@@ -79,7 +79,7 @@ const COMPARE_DATA = [
     line: 'Supreme Care',
     price: 'R$ 59,90',
     efficiency: 84,
-    color: '#FFD700',
+    color: '#C9973A',
     isScanned: true,
     pros: ['Alta absorção', 'Elástico macio', 'Sem vazamentos noturnos'],
     cons: ['Preço elevado', 'Aba adesiva pode soltar'],
@@ -91,7 +91,7 @@ const COMPARE_DATA = [
     line: 'Premium Care',
     price: 'R$ 52,90',
     efficiency: 93,
-    color: '#00FF87',
+    color: '#5C9E77',
     isBest: true,
     pros: ['Indicador de umidade', 'Pele mais seca', 'Alta disponibilidade'],
     cons: ['Pode apertar na cintura', 'Preço ainda elevado'],
@@ -103,7 +103,7 @@ const COMPARE_DATA = [
     line: 'Confort Sec',
     price: 'R$ 38,90',
     efficiency: 71,
-    color: '#00E5FF',
+    color: '#6B8FBF',
     pros: ['Preço acessível', 'Fácil de encontrar'],
     cons: ['Absorção inferior', 'Pode irritar pele sensível'],
     aiRec: 'Risco moderado. Adequado para uso diurno curto. Evitar uso prolongado.',
@@ -114,7 +114,7 @@ const COMPARE_DATA = [
     line: 'Baby',
     price: 'R$ 24,90',
     efficiency: 55,
-    color: '#FF6E40',
+    color: '#CC785C',
     pros: ['Muito acessível', 'Opção emergencial'],
     cons: ['Absorção limitada', 'Vazamentos relatados', 'Textura mais rígida'],
     aiRec: 'Alto risco para pele sensível. Apenas para uso emergencial.',
@@ -169,7 +169,7 @@ function ProductCard({ onClose, onSearchSimilar }) {
 
   const effColor = effAnim.interpolate({
     inputRange: [0, 0.5, 0.75, 1],
-    outputRange: ['#FF1744', '#FF6E40', '#FFD740', '#00E676'],
+    outputRange: ['#8B3A2A', '#CC785C', '#C9973A', '#5C9E77'],
   });
 
   return (
@@ -894,45 +894,58 @@ export default function App() {
 }
 
 // ─── Estilos ──────────────────────────────────────────────────────────────────
-const NEON   = '#00E5FF';
-const GOLD   = '#FFD700';
-const GREEN  = '#00FF87';
-const DARK   = '#0A0E1A';
-const CARD   = '#0D1425';
-const BORDER = '#1A2744';
+// Anthropic design system — warm, precise, trustworthy
+const ORANGE  = '#CC785C';   // primary — Anthropic signature
+const AMBER   = '#C9973A';   // secondary warm accent
+const CREAM   = '#E8E0D5';   // primary text
+const MUTED   = '#8C8279';   // secondary text
+const BG      = '#0F0D0B';   // deepest background
+const SURFACE = '#1A1714';   // card surface
+const SURFACE2= '#231F1B';   // elevated surface
+const BORDER  = '#2D2825';   // subtle border
+const SUCCESS = '#5C9E77';   // muted green
+const INFO    = '#6B8FBF';   // muted blue
+const PURPLE  = '#A88CBF';   // soft purple
+// aliases para manter compatibilidade com usos inline
+const NEON    = ORANGE;
+const GOLD    = AMBER;
+const GREEN   = SUCCESS;
+const DARK    = BG;
+const CARD    = SURFACE;
 
 const styles = StyleSheet.create({
   bg:          { flex: 1, backgroundColor: '#000' },
-  permScreen:  { flex: 1, backgroundColor: DARK, justifyContent: 'center', alignItems: 'center', padding: 32 },
-  permText:    { color: '#fff', fontSize: 16, textAlign: 'center', marginBottom: 24 },
-  permBtn:     { backgroundColor: NEON, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 8 },
-  permBtnText: { color: DARK, fontWeight: '900', fontSize: 14, letterSpacing: 1.5 },
+  permScreen:  { flex: 1, backgroundColor: BG, justifyContent: 'center', alignItems: 'center', padding: 32 },
+  permText:    { color: CREAM, fontSize: 16, textAlign: 'center', marginBottom: 24, lineHeight: 24 },
+  permBtn:     { backgroundColor: ORANGE, paddingHorizontal: 32, paddingVertical: 14, borderRadius: 10 },
+  permBtnText: { color: '#fff', fontWeight: '700', fontSize: 14, letterSpacing: 0.5 },
 
   hud: {
     position: 'absolute', top: Platform.OS === 'android' ? 44 : 56,
     left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8,
   },
-  hudTitle: { color: NEON, fontSize: 13, fontWeight: '900', letterSpacing: 3 },
-  hudDot:   { width: 7, height: 7, borderRadius: 4, backgroundColor: GREEN },
+  hudTitle: { color: CREAM, fontSize: 12, fontWeight: '600', letterSpacing: 2, opacity: 0.9 },
+  hudDot:   { width: 6, height: 6, borderRadius: 3, backgroundColor: ORANGE },
 
-  shade: { position: 'absolute', backgroundColor: 'rgba(0,0,0,0.55)' },
+  shade: { position: 'absolute', backgroundColor: 'rgba(0,0,0,0.60)' },
   detectedBorder: {
-    position: 'absolute', borderWidth: 2, borderColor: NEON, borderRadius: 4,
-    shadowColor: NEON, shadowRadius: 12, shadowOpacity: 1, shadowOffset: { width: 0, height: 0 },
+    position: 'absolute', borderWidth: 1.5, borderColor: ORANGE, borderRadius: 6,
+    shadowColor: ORANGE, shadowRadius: 16, shadowOpacity: 0.5, shadowOffset: { width: 0, height: 0 },
   },
-  corner:   { position: 'absolute', width: 20, height: 20 },
-  cornerTL: { borderTopWidth: 3, borderLeftWidth: 3,   borderColor: NEON },
-  cornerTR: { borderTopWidth: 3, borderRightWidth: 3,  borderColor: NEON },
-  cornerBL: { borderBottomWidth: 3, borderLeftWidth: 3,  borderColor: NEON },
-  cornerBR: { borderBottomWidth: 3, borderRightWidth: 3, borderColor: NEON },
+  corner:   { position: 'absolute', width: 22, height: 22 },
+  cornerTL: { borderTopWidth: 2.5, borderLeftWidth: 2.5,   borderColor: ORANGE, borderTopLeftRadius: 3 },
+  cornerTR: { borderTopWidth: 2.5, borderRightWidth: 2.5,  borderColor: ORANGE, borderTopRightRadius: 3 },
+  cornerBL: { borderBottomWidth: 2.5, borderLeftWidth: 2.5,  borderColor: ORANGE, borderBottomLeftRadius: 3 },
+  cornerBR: { borderBottomWidth: 2.5, borderRightWidth: 2.5, borderColor: ORANGE, borderBottomRightRadius: 3 },
   scanLine: {
-    position: 'absolute', height: 2, backgroundColor: NEON, opacity: 0.8,
-    shadowColor: NEON, shadowRadius: 6, shadowOpacity: 1,
+    position: 'absolute', height: 1.5, backgroundColor: ORANGE, opacity: 0.7,
+    shadowColor: ORANGE, shadowRadius: 8, shadowOpacity: 0.8,
   },
   scanLabel:     { position: 'absolute', alignItems: 'center' },
   scanLabelText: {
-    color: NEON, fontSize: 12, fontWeight: '800', letterSpacing: 2,
-    backgroundColor: 'rgba(0,229,255,0.12)', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 4,
+    color: CREAM, fontSize: 11, fontWeight: '600', letterSpacing: 1.5,
+    backgroundColor: 'rgba(15,13,11,0.82)', paddingHorizontal: 14, paddingVertical: 5,
+    borderRadius: 20, borderWidth: 1, borderColor: BORDER,
   },
 
   // Floating labels
@@ -945,194 +958,191 @@ const styles = StyleSheet.create({
   floatMain: { fontSize: 15, fontWeight: '900', letterSpacing: 1 },
   floatSub:  { fontSize: 8,  color: '#6B7FA3', fontWeight: '700', letterSpacing: 0.5, marginTop: 1 },
 
-  // OCR overlay
+  // OCR overlay — warm amber tones
   crosshair: { position: 'absolute', width: 30, height: 30 },
-  chLineH:   { position: 'absolute', top: 14, left: 0, right: 0, height: 2, backgroundColor: GOLD, opacity: 0.9 },
-  chLineV:   { position: 'absolute', left: 14, top: 0, bottom: 0, width: 2, backgroundColor: GOLD, opacity: 0.9 },
+  chLineH:   { position: 'absolute', top: 14, left: 0, right: 0, height: 1.5, backgroundColor: AMBER, opacity: 0.8 },
+  chLineV:   { position: 'absolute', left: 14, top: 0, bottom: 0, width: 1.5, backgroundColor: AMBER, opacity: 0.8 },
   chC:       { position: 'absolute', width: 9, height: 9 },
-  chTL:      { top: 0, left: 0,   borderTopWidth: 2, borderLeftWidth: 2,   borderColor: GOLD },
-  chTR:      { top: 0, right: 0,  borderTopWidth: 2, borderRightWidth: 2,  borderColor: GOLD },
-  chBL:      { bottom: 0, left: 0,  borderBottomWidth: 2, borderLeftWidth: 2,  borderColor: GOLD },
-  chBR:      { bottom: 0, right: 0, borderBottomWidth: 2, borderRightWidth: 2, borderColor: GOLD },
+  chTL:      { top: 0, left: 0,   borderTopWidth: 2, borderLeftWidth: 2,   borderColor: AMBER },
+  chTR:      { top: 0, right: 0,  borderTopWidth: 2, borderRightWidth: 2,  borderColor: AMBER },
+  chBL:      { bottom: 0, left: 0,  borderBottomWidth: 2, borderLeftWidth: 2,  borderColor: AMBER },
+  chBR:      { bottom: 0, right: 0, borderBottomWidth: 2, borderRightWidth: 2, borderColor: AMBER },
   detectBox: {
-    position: 'absolute', borderWidth: 1.5, borderColor: GOLD, borderRadius: 3,
-    backgroundColor: 'rgba(255,215,0,0.07)',
-    shadowColor: GOLD, shadowRadius: 10, shadowOpacity: 0.5, shadowOffset: { width: 0, height: 0 },
+    position: 'absolute', borderWidth: 1, borderColor: AMBER, borderRadius: 4,
+    backgroundColor: 'rgba(201,151,58,0.06)',
+    shadowColor: AMBER, shadowRadius: 8, shadowOpacity: 0.35, shadowOffset: { width: 0, height: 0 },
   },
   dCorner: { position: 'absolute', width: 10, height: 10 },
-  dTL:     { top: -1, left: -1,   borderTopWidth: 2, borderLeftWidth: 2,   borderColor: GOLD },
-  dTR:     { top: -1, right: -1,  borderTopWidth: 2, borderRightWidth: 2,  borderColor: GOLD },
-  dBL:     { bottom: -1, left: -1,  borderBottomWidth: 2, borderLeftWidth: 2,  borderColor: GOLD },
-  dBR:     { bottom: -1, right: -1, borderBottomWidth: 2, borderRightWidth: 2, borderColor: GOLD },
+  dTL:     { top: -1, left: -1,   borderTopWidth: 2, borderLeftWidth: 2,   borderColor: AMBER },
+  dTR:     { top: -1, right: -1,  borderTopWidth: 2, borderRightWidth: 2,  borderColor: AMBER },
+  dBL:     { bottom: -1, left: -1,  borderBottomWidth: 2, borderLeftWidth: 2,  borderColor: AMBER },
+  dBR:     { bottom: -1, right: -1, borderBottomWidth: 2, borderRightWidth: 2, borderColor: AMBER },
   brandReadout: { position: 'absolute', flexDirection: 'row', alignItems: 'center', gap: 8 },
-  marcaTag:     { backgroundColor: GOLD, paddingHorizontal: 5, paddingVertical: 2, borderRadius: 3 },
-  marcaTagText: { color: '#000', fontSize: 8, fontWeight: '900', letterSpacing: 1 },
-  typedBrand:   { color: GOLD, fontSize: 16, fontWeight: '900', letterSpacing: 3 },
+  marcaTag:     { backgroundColor: AMBER, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  marcaTagText: { color: '#0F0D0B', fontSize: 8, fontWeight: '700', letterSpacing: 0.5 },
+  typedBrand:   { color: CREAM, fontSize: 16, fontWeight: '700', letterSpacing: 2 },
   confBadge: {
-    position: 'absolute', backgroundColor: 'rgba(255,215,0,0.10)',
-    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4,
-    borderWidth: 1, borderColor: 'rgba(255,215,0,0.25)',
+    position: 'absolute', backgroundColor: 'rgba(201,151,58,0.10)',
+    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20,
+    borderWidth: 1, borderColor: 'rgba(201,151,58,0.30)',
   },
-  confText: { color: GOLD, fontSize: 9, fontWeight: '900', letterSpacing: 1.5 },
+  confText: { color: AMBER, fontSize: 9, fontWeight: '600', letterSpacing: 1 },
 
   // Scan button
   scanBtn: {
     position: 'absolute', bottom: 52, alignSelf: 'center',
-    borderWidth: 2, borderColor: NEON,
+    borderWidth: 1.5, borderColor: 'rgba(232,224,213,0.35)',
     paddingHorizontal: 40, paddingVertical: 16, borderRadius: 50,
-    backgroundColor: 'rgba(0,229,255,0.08)',
+    backgroundColor: 'rgba(15,13,11,0.72)',
   },
-  scanBtnActive: { borderColor: GREEN, backgroundColor: 'rgba(0,255,135,0.12)' },
-  scanBtnText:   { color: '#fff', fontWeight: '900', fontSize: 13, letterSpacing: 2 },
+  scanBtnActive: { borderColor: ORANGE, backgroundColor: 'rgba(204,120,92,0.15)' },
+  scanBtnText:   { color: CREAM, fontWeight: '600', fontSize: 13, letterSpacing: 1.5 },
 
   // Card
   cardWrapper: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     maxHeight: SH * 0.76,
-    backgroundColor: CARD, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    backgroundColor: SURFACE, borderTopLeftRadius: 20, borderTopRightRadius: 20,
     borderTopWidth: 1, borderColor: BORDER,
     paddingHorizontal: 20, paddingTop: 20, paddingBottom: 36,
-    shadowColor: NEON, shadowRadius: 20, shadowOpacity: 0.3, shadowOffset: { width: 0, height: -4 },
+    shadowColor: '#000', shadowRadius: 24, shadowOpacity: 0.5, shadowOffset: { width: 0, height: -4 },
   },
   cardHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardRarity:  { fontSize: 10, fontWeight: '900', letterSpacing: 2, marginBottom: 3 },
-  cardBrand:   { fontSize: 26, fontWeight: '900', color: '#fff', letterSpacing: 1 },
-  cardLine:    { fontSize: 11, color: '#6B7FA3', letterSpacing: 0.5, marginTop: 2 },
+  cardRarity:  { fontSize: 9, fontWeight: '700', letterSpacing: 1.5, marginBottom: 4, textTransform: 'uppercase' },
+  cardBrand:   { fontSize: 26, fontWeight: '700', color: CREAM, letterSpacing: 0.5 },
+  cardLine:    { fontSize: 12, color: MUTED, letterSpacing: 0.3, marginTop: 3 },
   priceTag:    { alignItems: 'flex-end' },
-  priceLabel:  { fontSize: 9, color: '#6B7FA3', letterSpacing: 1.5 },
-  priceValue:  { fontSize: 20, fontWeight: '900', color: '#fff' },
+  priceLabel:  { fontSize: 9, color: MUTED, letterSpacing: 1, textTransform: 'uppercase' },
+  priceValue:  { fontSize: 22, fontWeight: '700', color: CREAM },
   divider:     { height: 1, backgroundColor: BORDER, marginVertical: 14 },
-  statsSection: { gap: 10 },
+  statsSection: { gap: 12 },
   statRow:     { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  statLabel:   { width: 110, fontSize: 11, color: '#8899BB', fontWeight: '600', letterSpacing: 0.5 },
-  statTrack:   { flex: 1, height: 8, backgroundColor: '#1A2744', borderRadius: 4, overflow: 'hidden' },
-  statFill:    { height: '100%', borderRadius: 4 },
-  statGlow:    { ...StyleSheet.absoluteFillObject, shadowRadius: 6, shadowOpacity: 0.8, shadowOffset: { width: 0, height: 0 } },
-  statValue:   { width: 28, fontSize: 12, fontWeight: '900', textAlign: 'right' },
+  statLabel:   { width: 110, fontSize: 11, color: MUTED, fontWeight: '500' },
+  statTrack:   { flex: 1, height: 6, backgroundColor: BORDER, borderRadius: 3, overflow: 'hidden' },
+  statFill:    { height: '100%', borderRadius: 3 },
+  statGlow:    { ...StyleSheet.absoluteFillObject, shadowRadius: 4, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 0 } },
+  statValue:   { width: 28, fontSize: 12, fontWeight: '700', textAlign: 'right' },
   effSection:  { marginTop: 4 },
-  effHeader:   { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  effTitle:    { fontSize: 11, color: '#8899BB', fontWeight: '800', letterSpacing: 1.5 },
-  effPercent:  { fontSize: 11, color: '#fff', fontWeight: '900' },
-  effTrack:    { height: 18, backgroundColor: '#1A2744', borderRadius: 4, overflow: 'hidden' },
-  effFill:     { height: '100%', borderRadius: 4 },
-  effSegment:  { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  effHeader:   { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  effTitle:    { fontSize: 10, color: MUTED, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
+  effPercent:  { fontSize: 13, color: CREAM, fontWeight: '700' },
+  effTrack:    { height: 10, backgroundColor: BORDER, borderRadius: 5, overflow: 'hidden' },
+  effFill:     { height: '100%', borderRadius: 5 },
+  effSegment:  { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
 
   // Botão buscar similares
   searchBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: 'rgba(0,255,135,0.10)',
-    borderWidth: 1.5, borderColor: GREEN,
+    backgroundColor: ORANGE,
     borderRadius: 12, paddingVertical: 14, paddingHorizontal: 20,
-    shadowColor: GREEN, shadowRadius: 10, shadowOpacity: 0.25, shadowOffset: { width: 0, height: 0 },
   },
-  searchBtnIcon: { color: GREEN, fontSize: 18 },
-  searchBtnText: { color: GREEN, fontWeight: '900', fontSize: 13, letterSpacing: 1.5 },
+  searchBtnIcon: { color: '#fff', fontSize: 16 },
+  searchBtnText: { color: '#fff', fontWeight: '700', fontSize: 13, letterSpacing: 0.5 },
 
   closeBtn: {
     marginTop: 12, borderWidth: 1, borderColor: BORDER,
-    borderRadius: 8, paddingVertical: 12, alignItems: 'center',
+    borderRadius: 10, paddingVertical: 12, alignItems: 'center',
   },
-  closeBtnText: { color: '#6B7FA3', fontSize: 12, fontWeight: '800', letterSpacing: 2 },
+  closeBtnText: { color: MUTED, fontSize: 12, fontWeight: '500', letterSpacing: 1 },
 
   // Map screen
   mapScreen: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: DARK,
+    backgroundColor: BG,
   },
   mapTopBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 44 : 56,
     paddingBottom: 12,
-    backgroundColor: CARD,
+    backgroundColor: SURFACE,
     borderBottomWidth: 1, borderColor: BORDER,
   },
   mapBackBtn:  { paddingVertical: 4, paddingHorizontal: 8 },
-  mapBackText: { color: NEON, fontSize: 12, fontWeight: '800', letterSpacing: 1 },
-  mapTitle:    { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  mapBackText: { color: ORANGE, fontSize: 12, fontWeight: '600', letterSpacing: 0.3 },
+  mapTitle:    { color: CREAM, fontSize: 11, fontWeight: '600', letterSpacing: 1 },
 
   // User dot
   userDot: {
     position: 'absolute', width: 20, height: 20,
-    borderRadius: 10, backgroundColor: 'rgba(0,229,255,0.25)',
-    borderWidth: 2, borderColor: NEON,
+    borderRadius: 10, backgroundColor: 'rgba(204,120,92,0.2)',
+    borderWidth: 2, borderColor: ORANGE,
     alignItems: 'center', justifyContent: 'center',
-    shadowColor: NEON, shadowRadius: 8, shadowOpacity: 0.8, shadowOffset: { width: 0, height: 0 },
+    shadowColor: ORANGE, shadowRadius: 8, shadowOpacity: 0.5, shadowOffset: { width: 0, height: 0 },
   },
-  userDotInner: { width: 7, height: 7, borderRadius: 4, backgroundColor: NEON },
+  userDotInner: { width: 7, height: 7, borderRadius: 4, backgroundColor: ORANGE },
   userLabel: {
     position: 'absolute',
-    backgroundColor: 'rgba(0,229,255,0.15)',
-    paddingHorizontal: 5, paddingVertical: 1, borderRadius: 3,
+    backgroundColor: 'rgba(204,120,92,0.12)',
+    paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4,
   },
-  userLabelText: { color: NEON, fontSize: 8, fontWeight: '900', letterSpacing: 1 },
+  userLabelText: { color: ORANGE, fontSize: 8, fontWeight: '600', letterSpacing: 0.5 },
 
   // Pins
   pinBubble: {
-    backgroundColor: '#0D1A2E',
-    borderWidth: 1, borderColor: '#1A3055',
-    borderRadius: 8, padding: 8, minWidth: 130,
-    shadowColor: '#000', shadowRadius: 8, shadowOpacity: 0.6, shadowOffset: { width: 0, height: 2 },
+    backgroundColor: SURFACE,
+    borderWidth: 1, borderColor: BORDER,
+    borderRadius: 10, padding: 8, minWidth: 130,
+    shadowColor: '#000', shadowRadius: 8, shadowOpacity: 0.5, shadowOffset: { width: 0, height: 2 },
   },
   pinBubbleBest: {
-    borderColor: GREEN,
-    shadowColor: GREEN, shadowRadius: 12, shadowOpacity: 0.4,
-    backgroundColor: '#0A1F15',
+    borderColor: SUCCESS,
+    shadowColor: SUCCESS, shadowRadius: 10, shadowOpacity: 0.25,
+    backgroundColor: '#161E18',
   },
-  pinName:     { color: '#fff', fontSize: 11, fontWeight: '800' },
-  pinNameBest: { color: GREEN },
-  pinProduct:  { color: '#6B7FA3', fontSize: 9, marginTop: 2 },
+  pinName:     { color: CREAM, fontSize: 11, fontWeight: '700' },
+  pinNameBest: { color: SUCCESS },
+  pinProduct:  { color: MUTED, fontSize: 9, marginTop: 2 },
   pinPriceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 },
-  pinPrice:    { color: '#fff', fontSize: 13, fontWeight: '900' },
+  pinPrice:    { color: CREAM, fontSize: 13, fontWeight: '700' },
   pinEffTag:   { paddingHorizontal: 5, paddingVertical: 2, borderRadius: 4, borderWidth: 1 },
-  pinEffText:  { fontSize: 9, fontWeight: '900' },
-  bestBadge:   { marginTop: 5, backgroundColor: 'rgba(0,255,135,0.15)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, alignSelf: 'flex-start' },
-  bestBadgeText: { color: GREEN, fontSize: 9, fontWeight: '900', letterSpacing: 1 },
-  pinStem:     { width: 2, height: 10 },
-  pinDot:      { width: 10, height: 10, borderRadius: 5, shadowRadius: 6, shadowOpacity: 0.8, shadowOffset: { width: 0, height: 0 } },
+  pinEffText:  { fontSize: 9, fontWeight: '600' },
+  bestBadge:   { marginTop: 5, backgroundColor: 'rgba(92,158,119,0.15)', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, alignSelf: 'flex-start' },
+  bestBadgeText: { color: SUCCESS, fontSize: 9, fontWeight: '600', letterSpacing: 0.5 },
+  pinStem:     { width: 1.5, height: 10 },
+  pinDot:      { width: 9, height: 9, borderRadius: 5, shadowRadius: 5, shadowOpacity: 0.6, shadowOffset: { width: 0, height: 0 } },
 
   // Searching overlay
   searchingBox: {
     position: 'absolute', bottom: 20, left: 20, right: 20,
-    backgroundColor: 'rgba(13,20,37,0.92)',
+    backgroundColor: 'rgba(26,23,20,0.95)',
     borderWidth: 1, borderColor: BORDER,
-    borderRadius: 12, padding: 16, alignItems: 'center',
+    borderRadius: 14, padding: 16, alignItems: 'center',
   },
-  searchingText: { color: '#8899BB', fontSize: 13, textAlign: 'center', lineHeight: 20 },
+  searchingText: { color: MUTED, fontSize: 13, textAlign: 'center', lineHeight: 20 },
 
   // Result panel
   resultPanel: {
-    backgroundColor: CARD,
+    backgroundColor: SURFACE,
     borderTopWidth: 1, borderColor: BORDER,
     paddingHorizontal: 18, paddingTop: 14, paddingBottom: 20,
   },
   resultHeader: {
-    backgroundColor: 'rgba(0,255,135,0.10)',
-    borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5,
+    backgroundColor: 'rgba(92,158,119,0.12)',
+    borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4,
     alignSelf: 'flex-start', marginBottom: 12,
-    borderWidth: 1, borderColor: 'rgba(0,255,135,0.25)',
+    borderWidth: 1, borderColor: 'rgba(92,158,119,0.25)',
   },
-  resultHeaderText: { color: GREEN, fontSize: 10, fontWeight: '900', letterSpacing: 1.5 },
+  resultHeaderText: { color: SUCCESS, fontSize: 10, fontWeight: '600', letterSpacing: 0.8 },
   resultBody:    { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  resultStore:   { color: '#fff', fontSize: 15, fontWeight: '900' },
-  resultProduct: { color: '#6B7FA3', fontSize: 11, marginTop: 2 },
-  resultDist:    { color: '#6B7FA3', fontSize: 11, marginTop: 4 },
+  resultStore:   { color: CREAM, fontSize: 15, fontWeight: '700' },
+  resultProduct: { color: MUTED, fontSize: 11, marginTop: 2 },
+  resultDist:    { color: MUTED, fontSize: 11, marginTop: 4 },
   resultRight:   { alignItems: 'flex-end' },
-  resultPrice:   { color: GREEN, fontSize: 22, fontWeight: '900' },
+  resultPrice:   { color: SUCCESS, fontSize: 22, fontWeight: '700' },
   resultEffRow:  { flexDirection: 'row', alignItems: 'baseline', marginTop: 2 },
-  resultEff:     { color: NEON, fontSize: 13, fontWeight: '900' },
-  resultEffLabel: { color: '#6B7FA3', fontSize: 10 },
-  resultSaving:  { color: GOLD, fontSize: 10, fontWeight: '800', marginTop: 4 },
+  resultEff:     { color: ORANGE, fontSize: 13, fontWeight: '700' },
+  resultEffLabel: { color: MUTED, fontSize: 10 },
+  resultSaving:  { color: AMBER, fontSize: 10, fontWeight: '600', marginTop: 4 },
   resultBtns: { flexDirection: 'row', gap: 10, marginTop: 14 },
   navigateBtn: {
-    backgroundColor: 'rgba(0,229,255,0.10)',
-    borderWidth: 1.5, borderColor: NEON,
+    backgroundColor: ORANGE,
     borderRadius: 10, paddingVertical: 13, alignItems: 'center',
   },
-  navigateBtnText: { color: NEON, fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
+  navigateBtnText: { color: '#fff', fontWeight: '700', fontSize: 12, letterSpacing: 0.3 },
   compareBtn: {
-    backgroundColor: 'rgba(255,215,0,0.10)',
-    borderWidth: 1.5, borderColor: GOLD,
+    backgroundColor: SURFACE2,
+    borderWidth: 1, borderColor: BORDER,
     borderRadius: 10, paddingVertical: 13, paddingHorizontal: 18, alignItems: 'center',
   },
   compareBtnText: { color: GOLD, fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
@@ -1146,44 +1156,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: Platform.OS === 'android' ? 44 : 56,
     paddingBottom: 12,
-    backgroundColor: CARD,
+    backgroundColor: SURFACE,
     borderBottomWidth: 1, borderColor: BORDER,
   },
-  compareTitle: { color: '#fff', fontSize: 13, fontWeight: '900', letterSpacing: 3 },
+  compareTitle: { color: CREAM, fontSize: 12, fontWeight: '600', letterSpacing: 2 },
   compareGrid: {
     flexDirection: 'row', flexWrap: 'wrap',
-    gap: 12, padding: 12,
+    gap: 10, padding: 10,
     justifyContent: 'space-between',
   },
   compareCard: {
-    backgroundColor: '#0D1425',
-    borderWidth: 1.5, borderRadius: 12,
+    backgroundColor: SURFACE,
+    borderWidth: 1, borderRadius: 14,
     padding: 10, overflow: 'hidden',
   },
   cCardHeader: {
     flexDirection: 'row', alignItems: 'flex-start',
-    borderBottomWidth: 1, paddingBottom: 8, marginBottom: 8, gap: 4,
+    borderBottomWidth: 1, borderBottomColor: BORDER, paddingBottom: 8, marginBottom: 8, gap: 4,
   },
-  cBrand:  { fontSize: 13, fontWeight: '900', letterSpacing: 1 },
-  cLine:   { fontSize: 9, color: '#6B7FA3', marginTop: 1 },
-  scannedBadge: { backgroundColor: 'rgba(255,215,0,0.15)', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(255,215,0,0.4)' },
-  scannedText:  { color: '#FFD700', fontSize: 7, fontWeight: '900', letterSpacing: 0.5 },
-  bestCardBadge: { backgroundColor: 'rgba(0,255,135,0.15)', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(0,255,135,0.4)' },
-  bestCardText:  { color: '#00FF87', fontSize: 7, fontWeight: '900', letterSpacing: 0.5 },
+  cBrand:  { fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
+  cLine:   { fontSize: 9, color: MUTED, marginTop: 1 },
+  scannedBadge: { backgroundColor: 'rgba(201,151,58,0.15)', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(201,151,58,0.35)' },
+  scannedText:  { color: AMBER, fontSize: 7, fontWeight: '700', letterSpacing: 0.3 },
+  bestCardBadge: { backgroundColor: 'rgba(92,158,119,0.15)', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(92,158,119,0.35)' },
+  bestCardText:  { color: SUCCESS, fontSize: 7, fontWeight: '700', letterSpacing: 0.3 },
   cMetrics:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  cPrice:    { fontSize: 15, fontWeight: '900' },
+  cPrice:    { fontSize: 15, fontWeight: '700' },
   cEffPill:  { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
-  cEffText:  { fontSize: 10, fontWeight: '900' },
+  cEffText:  { fontSize: 10, fontWeight: '600' },
   cSection:  { marginBottom: 7 },
-  cSectionLabel: { fontSize: 8, fontWeight: '900', color: '#00FF87', letterSpacing: 1, marginBottom: 4 },
+  cSectionLabel: { fontSize: 8, fontWeight: '600', color: SUCCESS, letterSpacing: 0.8, marginBottom: 4 },
   cBulletRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 5, marginBottom: 3 },
-  cBullet:    { width: 5, height: 5, borderRadius: 3, marginTop: 3, flexShrink: 0 },
-  cBulletText: { fontSize: 9, color: '#A0B0CC', flex: 1, lineHeight: 13 },
+  cBullet:    { width: 4, height: 4, borderRadius: 2, marginTop: 4, flexShrink: 0 },
+  cBulletText: { fontSize: 9, color: MUTED, flex: 1, lineHeight: 13 },
   cAiBox: {
     marginTop: 4, borderWidth: 1, borderRadius: 8, padding: 7,
   },
   cAiHeader: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 3 },
   cAiIcon:   { fontSize: 10 },
-  cRiskTag:  { fontSize: 8, fontWeight: '900', letterSpacing: 1 },
-  cAiText:   { fontSize: 8, color: '#8899BB', lineHeight: 12 },
+  cRiskTag:  { fontSize: 8, fontWeight: '600', letterSpacing: 0.5 },
+  cAiText:   { fontSize: 8, color: MUTED, lineHeight: 12 },
 });
