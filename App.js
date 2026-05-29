@@ -12,6 +12,14 @@ const BOX_H    = BOX_W * 0.55;
 const BOX_LEFT = (SW - BOX_W) / 2;
 const BOX_TOP  = SH * 0.22;
 
+// ─── Labels flutuantes sobre o produto (padrão Cal AI) ───────────────────────
+const FLOAT_LABELS = [
+  { text: 'HUGGIES',   sub: 'Supreme Care',    rx: 0.03, ry: 0.05, color: '#FFD700', delay: 0   },
+  { text: 'R$ 59,90',  sub: 'PREÇO ATUAL',      rx: 0.56, ry: 0.05, color: '#00E5FF', delay: 220 },
+  { text: '84%',       sub: 'EFICIÊNCIA',        rx: 0.34, ry: 0.56, color: '#00FF87', delay: 440 },
+  { text: 'PREMIUM',   sub: 'FRALDA DESC.',      rx: 0.03, ry: 0.54, color: '#B388FF', delay: 660 },
+];
+
 // ─── Dados mockados ───────────────────────────────────────────────────────────
 const PRODUCT = {
   brand: 'HUGGIES',
@@ -666,6 +674,68 @@ function TextDetectionOverlay({ active }) {
   );
 }
 
+// ─── Labels flutuantes sobre câmera ──────────────────────────────────────────
+function FloatingLabelsOverlay({ active }) {
+  const labelAnims = useRef(FLOAT_LABELS.map(() => new Animated.Value(0))).current;
+  const floatAnims = useRef(FLOAT_LABELS.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    if (!active) {
+      labelAnims.forEach(a => { a.stopAnimation(); a.setValue(0); });
+      floatAnims.forEach(a => { a.stopAnimation(); a.setValue(0); });
+      return;
+    }
+    FLOAT_LABELS.forEach((_, i) => {
+      setTimeout(() => {
+        Animated.spring(labelAnims[i], {
+          toValue: 1, tension: 90, friction: 8, useNativeDriver: true,
+        }).start();
+        Animated.loop(Animated.sequence([
+          Animated.timing(floatAnims[i], { toValue: 1, duration: 1400, useNativeDriver: true }),
+          Animated.timing(floatAnims[i], { toValue: 0, duration: 1400, useNativeDriver: true }),
+        ])).start();
+      }, FLOAT_LABELS[i].delay);
+    });
+  }, [active]);
+
+  if (!active) return null;
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {FLOAT_LABELS.map((label, i) => {
+        const x = BOX_LEFT + label.rx * BOX_W;
+        const y = BOX_TOP  + label.ry * BOX_H;
+        const floatY = floatAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0, -7] });
+
+        return (
+          <Animated.View key={label.text + i} style={{
+            position: 'absolute', left: x, top: y,
+            opacity: labelAnims[i],
+            transform: [
+              { scale: labelAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }) },
+              { translateY: floatY },
+            ],
+          }}>
+            {/* Pill */}
+            <View style={[styles.floatPill, {
+              borderColor: label.color + '70',
+              shadowColor: label.color,
+            }]}>
+              <Text style={[styles.floatMain, { color: label.color }]}>{label.text}</Text>
+              <Text style={styles.floatSub}>{label.sub}</Text>
+            </View>
+            {/* Conector */}
+            <View style={{ alignItems: 'flex-start', paddingLeft: 10 }}>
+              <View style={{ width: 1.5, height: 10, backgroundColor: label.color, opacity: 0.5 }} />
+              <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: label.color, opacity: 0.8, marginLeft: -2 }} />
+            </View>
+          </Animated.View>
+        );
+      })}
+    </View>
+  );
+}
+
 // ─── ScanOverlay ──────────────────────────────────────────────────────────────
 function ScanOverlay({ scanning, textDetecting, detected }) {
   const scanLine    = useRef(new Animated.Value(0)).current;
@@ -729,6 +799,7 @@ export default function App() {
   const [scanning,      setScanning]      = useState(false);
   const [textDetecting, setTextDetecting] = useState(false);
   const [detected,      setDetected]      = useState(false);
+  const [showFloating,  setShowFloating]  = useState(false);
   const [showCard,      setShowCard]      = useState(false);
   const [showMap,       setShowMap]       = useState(false);
   const timerRef = useRef(null);
@@ -742,15 +813,24 @@ export default function App() {
       setTimeout(() => {
         setTextDetecting(false);
         setDetected(true);
-        setTimeout(() => setShowCard(true), 700);
+        // Labels flutuantes aparecem 300ms após o glow
+        setTimeout(() => {
+          setShowFloating(true);
+          // Card sobe depois que o usuário viu todos os labels (1.8s)
+          setTimeout(() => {
+            setShowFloating(false);
+            setShowCard(true);
+          }, 1800);
+        }, 300);
       }, 1900);
     }, 2000);
   }
 
   function handleClose() {
     clearTimeout(timerRef.current);
-    setShowCard(false); setDetected(false);
-    setScanning(false); setTextDetecting(false);
+    setShowCard(false); setShowFloating(false);
+    setDetected(false); setScanning(false);
+    setTextDetecting(false);
   }
 
   function handleSearchSimilar() {
@@ -784,6 +864,7 @@ export default function App() {
 
       <ScanOverlay scanning={scanning} textDetecting={textDetecting} detected={detected} />
       <TextDetectionOverlay active={textDetecting} />
+      <FloatingLabelsOverlay active={showFloating} />
 
       <View style={styles.hud}>
         <Text style={styles.hudTitle}>◈ FRALDA SCANNER</Text>
@@ -853,6 +934,16 @@ const styles = StyleSheet.create({
     color: NEON, fontSize: 12, fontWeight: '800', letterSpacing: 2,
     backgroundColor: 'rgba(0,229,255,0.12)', paddingHorizontal: 14, paddingVertical: 4, borderRadius: 4,
   },
+
+  // Floating labels
+  floatPill: {
+    backgroundColor: 'rgba(8, 12, 24, 0.92)',
+    borderWidth: 1.5, borderRadius: 10,
+    paddingHorizontal: 10, paddingVertical: 6,
+    shadowRadius: 10, shadowOpacity: 0.7, shadowOffset: { width: 0, height: 0 },
+  },
+  floatMain: { fontSize: 15, fontWeight: '900', letterSpacing: 1 },
+  floatSub:  { fontSize: 8,  color: '#6B7FA3', fontWeight: '700', letterSpacing: 0.5, marginTop: 1 },
 
   // OCR overlay
   crosshair: { position: 'absolute', width: 30, height: 30 },
