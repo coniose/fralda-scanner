@@ -65,6 +65,55 @@ const NEARBY = [
   },
 ];
 
+const COMPARE_DATA = [
+  {
+    brand: 'HUGGIES',
+    line: 'Supreme Care',
+    price: 'R$ 59,90',
+    efficiency: 84,
+    color: '#FFD700',
+    isScanned: true,
+    pros: ['Alta absorção', 'Elástico macio', 'Sem vazamentos noturnos'],
+    cons: ['Preço elevado', 'Aba adesiva pode soltar'],
+    aiRec: 'Bom para pele sensível e uso noturno. Risco baixo de não atender.',
+    aiRisk: 'low',
+  },
+  {
+    brand: 'PAMPERS',
+    line: 'Premium Care',
+    price: 'R$ 52,90',
+    efficiency: 93,
+    color: '#00FF87',
+    isBest: true,
+    pros: ['Indicador de umidade', 'Pele mais seca', 'Alta disponibilidade'],
+    cons: ['Pode apertar na cintura', 'Preço ainda elevado'],
+    aiRec: 'Melhor custo-benefício da região. Economia de R$ 7,00. Risco muito baixo.',
+    aiRisk: 'low',
+  },
+  {
+    brand: 'PAMPERS',
+    line: 'Confort Sec',
+    price: 'R$ 38,90',
+    efficiency: 71,
+    color: '#00E5FF',
+    pros: ['Preço acessível', 'Fácil de encontrar'],
+    cons: ['Absorção inferior', 'Pode irritar pele sensível'],
+    aiRec: 'Risco moderado. Adequado para uso diurno curto. Evitar uso prolongado.',
+    aiRisk: 'medium',
+  },
+  {
+    brand: 'POPOM',
+    line: 'Baby',
+    price: 'R$ 24,90',
+    efficiency: 55,
+    color: '#FF6E40',
+    pros: ['Muito acessível', 'Opção emergencial'],
+    cons: ['Absorção limitada', 'Vazamentos relatados', 'Textura mais rígida'],
+    aiRec: 'Alto risco para pele sensível. Apenas para uso emergencial.',
+    aiRisk: 'high',
+  },
+];
+
 // ─── StatBar ──────────────────────────────────────────────────────────────────
 function StatBar({ label, value, color, delay }) {
   const anim = useRef(new Animated.Value(0)).current;
@@ -261,6 +310,7 @@ function MapPin({ store, mapH, anim }) {
 
 // ─── Tela de busca no mapa ────────────────────────────────────────────────────
 function MapSearchScreen({ onClose }) {
+  const [showCompare, setShowCompare] = useState(false);
   const MAP_H      = SH * 0.62;
   const USER_X     = SW * 0.50;
   const USER_Y     = MAP_H * 0.46;
@@ -385,10 +435,17 @@ function MapSearchScreen({ onClose }) {
             </Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.navigateBtn} activeOpacity={0.85}>
-          <Text style={styles.navigateBtnText}>COMO CHEGAR  →</Text>
-        </TouchableOpacity>
+        <View style={styles.resultBtns}>
+          <TouchableOpacity style={[styles.navigateBtn, { flex: 1 }]} activeOpacity={0.85}>
+            <Text style={styles.navigateBtnText}>COMO CHEGAR →</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.compareBtn} onPress={() => setShowCompare(true)} activeOpacity={0.85}>
+            <Text style={styles.compareBtnText}>COMPARAR</Text>
+          </TouchableOpacity>
+        </View>
       </Animated.View>
+
+      {showCompare && <CompareScreen onClose={() => setShowCompare(false)} />}
 
       {/* Loading spinner enquanto busca */}
       {phase === 'searching' && (
@@ -396,6 +453,105 @@ function MapSearchScreen({ onClose }) {
           <Text style={styles.searchingText}>Analisando preços e eficiência{'\n'}em lojas próximas...</Text>
         </View>
       )}
+    </Animated.View>
+  );
+}
+
+// ─── Tela de comparação 2x2 ──────────────────────────────────────────────────
+function CompareScreen({ onClose }) {
+  const slideAnim = useRef(new Animated.Value(SW)).current;
+  const cardAnims = useRef(COMPARE_DATA.map(() => new Animated.Value(0))).current;
+
+  const RISK_COLOR = { low: '#00FF87', medium: '#FFD700', high: '#FF4444' };
+  const RISK_LABEL = { low: 'RISCO BAIXO', medium: 'RISCO MÉDIO', high: 'RISCO ALTO' };
+
+  useEffect(() => {
+    Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 12, useNativeDriver: true }).start();
+    COMPARE_DATA.forEach((_, i) => {
+      setTimeout(() => {
+        Animated.spring(cardAnims[i], { toValue: 1, tension: 80, friction: 10, useNativeDriver: true }).start();
+      }, i * 120);
+    });
+  }, []);
+
+  const CARD_W = (SW - 36) / 2;
+  const CARD_H = (SH - 140) / 2;
+
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, styles.compareScreen, {
+      transform: [{ translateX: slideAnim }],
+    }]}>
+      <StatusBar barStyle="light-content" />
+
+      {/* Top bar */}
+      <View style={styles.compareTopBar}>
+        <TouchableOpacity onPress={onClose} style={styles.mapBackBtn}>
+          <Text style={styles.mapBackText}>← VOLTAR</Text>
+        </TouchableOpacity>
+        <Text style={styles.compareTitle}>COMPARATIVO</Text>
+        <View style={{ width: 70 }} />
+      </View>
+
+      {/* Grid 2x2 */}
+      <ScrollView contentContainerStyle={styles.compareGrid} showsVerticalScrollIndicator={false}>
+        {COMPARE_DATA.map((p, i) => (
+          <Animated.View key={p.brand + p.line} style={[styles.compareCard, {
+            width: CARD_W,
+            borderColor: p.isScanned ? '#FFD700' : p.isBest ? '#00FF87' : '#1A2744',
+            opacity: cardAnims[i],
+            transform: [{ scale: cardAnims[i].interpolate({ inputRange: [0, 1], outputRange: [0.88, 1] }) }],
+          }]}>
+            {/* Header do card */}
+            <View style={[styles.cCardHeader, { borderBottomColor: p.color + '44' }]}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.cBrand, { color: p.color }]}>{p.brand}</Text>
+                <Text style={styles.cLine}>{p.line}</Text>
+              </View>
+              {p.isScanned && <View style={styles.scannedBadge}><Text style={styles.scannedText}>ESCANEADO</Text></View>}
+              {p.isBest  && <View style={styles.bestCardBadge}><Text style={styles.bestCardText}>★ MELHOR</Text></View>}
+            </View>
+
+            {/* Preço + eficiência */}
+            <View style={styles.cMetrics}>
+              <Text style={[styles.cPrice, { color: p.isBest ? '#00FF87' : '#fff' }]}>{p.price}</Text>
+              <View style={[styles.cEffPill, { backgroundColor: p.color + '22', borderColor: p.color + '55' }]}>
+                <Text style={[styles.cEffText, { color: p.color }]}>{p.efficiency}%</Text>
+              </View>
+            </View>
+
+            {/* Prós */}
+            <View style={styles.cSection}>
+              <Text style={styles.cSectionLabel}>✓ PONTOS FORTES</Text>
+              {p.pros.map(pro => (
+                <View key={pro} style={styles.cBulletRow}>
+                  <View style={[styles.cBullet, { backgroundColor: '#00FF87' }]} />
+                  <Text style={styles.cBulletText} numberOfLines={2}>{pro}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Contras */}
+            <View style={styles.cSection}>
+              <Text style={[styles.cSectionLabel, { color: '#FF4444' }]}>✗ PONTOS FRACOS</Text>
+              {p.cons.slice(0, 2).map(con => (
+                <View key={con} style={styles.cBulletRow}>
+                  <View style={[styles.cBullet, { backgroundColor: '#FF4444' }]} />
+                  <Text style={styles.cBulletText} numberOfLines={2}>{con}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* Recomendação IA */}
+            <View style={[styles.cAiBox, { borderColor: RISK_COLOR[p.aiRisk] + '44', backgroundColor: RISK_COLOR[p.aiRisk] + '0D' }]}>
+              <View style={styles.cAiHeader}>
+                <Text style={styles.cAiIcon}>◎</Text>
+                <Text style={[styles.cRiskTag, { color: RISK_COLOR[p.aiRisk] }]}>{RISK_LABEL[p.aiRisk]}</Text>
+              </View>
+              <Text style={styles.cAiText}>{p.aiRec}</Text>
+            </View>
+          </Animated.View>
+        ))}
+      </ScrollView>
     </Animated.View>
   );
 }
@@ -876,10 +1032,67 @@ const styles = StyleSheet.create({
   resultEff:     { color: NEON, fontSize: 13, fontWeight: '900' },
   resultEffLabel: { color: '#6B7FA3', fontSize: 10 },
   resultSaving:  { color: GOLD, fontSize: 10, fontWeight: '800', marginTop: 4 },
+  resultBtns: { flexDirection: 'row', gap: 10, marginTop: 14 },
   navigateBtn: {
-    marginTop: 14, backgroundColor: 'rgba(0,229,255,0.10)',
+    backgroundColor: 'rgba(0,229,255,0.10)',
     borderWidth: 1.5, borderColor: NEON,
     borderRadius: 10, paddingVertical: 13, alignItems: 'center',
   },
-  navigateBtnText: { color: NEON, fontWeight: '900', fontSize: 13, letterSpacing: 2 },
+  navigateBtnText: { color: NEON, fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
+  compareBtn: {
+    backgroundColor: 'rgba(255,215,0,0.10)',
+    borderWidth: 1.5, borderColor: GOLD,
+    borderRadius: 10, paddingVertical: 13, paddingHorizontal: 18, alignItems: 'center',
+  },
+  compareBtnText: { color: GOLD, fontWeight: '900', fontSize: 12, letterSpacing: 1.5 },
+
+  // Compare screen
+  compareScreen: {
+    backgroundColor: DARK,
+  },
+  compareTopBar: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 44 : 56,
+    paddingBottom: 12,
+    backgroundColor: CARD,
+    borderBottomWidth: 1, borderColor: BORDER,
+  },
+  compareTitle: { color: '#fff', fontSize: 13, fontWeight: '900', letterSpacing: 3 },
+  compareGrid: {
+    flexDirection: 'row', flexWrap: 'wrap',
+    gap: 12, padding: 12,
+    justifyContent: 'space-between',
+  },
+  compareCard: {
+    backgroundColor: '#0D1425',
+    borderWidth: 1.5, borderRadius: 12,
+    padding: 10, overflow: 'hidden',
+  },
+  cCardHeader: {
+    flexDirection: 'row', alignItems: 'flex-start',
+    borderBottomWidth: 1, paddingBottom: 8, marginBottom: 8, gap: 4,
+  },
+  cBrand:  { fontSize: 13, fontWeight: '900', letterSpacing: 1 },
+  cLine:   { fontSize: 9, color: '#6B7FA3', marginTop: 1 },
+  scannedBadge: { backgroundColor: 'rgba(255,215,0,0.15)', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(255,215,0,0.4)' },
+  scannedText:  { color: '#FFD700', fontSize: 7, fontWeight: '900', letterSpacing: 0.5 },
+  bestCardBadge: { backgroundColor: 'rgba(0,255,135,0.15)', borderRadius: 4, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: 'rgba(0,255,135,0.4)' },
+  bestCardText:  { color: '#00FF87', fontSize: 7, fontWeight: '900', letterSpacing: 0.5 },
+  cMetrics:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  cPrice:    { fontSize: 15, fontWeight: '900' },
+  cEffPill:  { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
+  cEffText:  { fontSize: 10, fontWeight: '900' },
+  cSection:  { marginBottom: 7 },
+  cSectionLabel: { fontSize: 8, fontWeight: '900', color: '#00FF87', letterSpacing: 1, marginBottom: 4 },
+  cBulletRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 5, marginBottom: 3 },
+  cBullet:    { width: 5, height: 5, borderRadius: 3, marginTop: 3, flexShrink: 0 },
+  cBulletText: { fontSize: 9, color: '#A0B0CC', flex: 1, lineHeight: 13 },
+  cAiBox: {
+    marginTop: 4, borderWidth: 1, borderRadius: 8, padding: 7,
+  },
+  cAiHeader: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 3 },
+  cAiIcon:   { fontSize: 10 },
+  cRiskTag:  { fontSize: 8, fontWeight: '900', letterSpacing: 1 },
+  cAiText:   { fontSize: 8, color: '#8899BB', lineHeight: 12 },
 });
