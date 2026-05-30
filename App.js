@@ -12,6 +12,45 @@ const BOX_H    = BOX_W * 0.55;
 const BOX_LEFT = (SW - BOX_W) / 2;
 const BOX_TOP  = SH * 0.22;
 
+// ─── Claude Vision — prompt e chamada de API ─────────────────────────────────
+const VISION_PROMPT = `Analise esta imagem de uma gôndola de supermercado.
+
+Se houver um produto de fralda ou higiene infantil com texto de marca legível:
+1. Identifique a marca principal (HUGGIES, PAMPERS, etc.)
+2. Identifique a linha/modelo
+3. Localize o texto da MARCA na imagem em porcentagens (0=topo/esquerda, 100=fundo/direita)
+
+Retorne APENAS JSON válido, sem markdown, sem explicação:
+{"detected":true,"brand":"HUGGIES","line":"Supreme Care","type":"FRALDA DESCARTÁVEL","textBox":{"top":22,"left":8,"width":72,"height":19},"confidence":94}
+
+Se não houver produto de fralda/higiene visível ou texto ilegível:
+{"detected":false}`;
+
+async function analyzeWithClaude(base64) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': process.env.EXPO_PUBLIC_ANTHROPIC_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 200,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+          { type: 'text', text: VISION_PROMPT },
+        ],
+      }],
+    }),
+  });
+  if (!res.ok) throw new Error(`Claude API ${res.status}`);
+  const data = await res.json();
+  return JSON.parse(data.content[0].text.trim());
+}
+
 // ─── Labels flutuantes sobre o produto (padrão Cal AI) ───────────────────────
 const FLOAT_LABELS = [
   { text: 'HUGGIES',   sub: 'Supreme Care',    rx: 0.03, ry: 0.05, color: '#CC785C', delay: 0   },
@@ -736,6 +775,101 @@ function FloatingLabelsOverlay({ active }) {
   );
 }
 
+// ─── Bounding box sobre o texto real detectado pelo Claude ───────────────────
+function BrandBoundingBox({ textBox, brand, active }) {
+  const borderOpacity = useRef(new Animated.Value(0)).current;
+  const scaleAnim     = useRef(new Animated.Value(0.7)).current;
+  const glowAnim      = useRef(new Animated.Value(0.5)).current;
+  const labelOpacity  = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!active || !textBox) {
+      [borderOpacity, scaleAnim, glowAnim, labelOpacity].forEach(a => {
+        a.stopAnimation(); a.setValue(a === scaleAnim ? 0.7 : 0);
+      });
+      return;
+    }
+    Animated.parallel([
+      Animated.spring(scaleAnim,     { toValue: 1, tension: 80, friction: 8, useNativeDriver: true }),
+      Animated.timing(borderOpacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+    ]).start();
+    Animated.loop(Animated.sequence([
+      Animated.timing(glowAnim, { toValue: 1,   duration: 550, useNativeDriver: true }),
+      Animated.timing(glowAnim, { toValue: 0.4, duration: 550, useNativeDriver: true }),
+    ])).start();
+    setTimeout(() => {
+      Animated.timing(labelOpacity, { toValue: 1, duration: 250, useNativeDriver: true }).start();
+    }, 400);
+  }, [active, textBox]);
+
+  if (!active || !textBox) return null;
+
+  const bx = (textBox.left  / 100) * SW;
+  const by = (textBox.top   / 100) * SH;
+  const bw = (textBox.width / 100) * SW;
+  const bh = (textBox.height/ 100) * SH;
+  const PAD = 6;
+
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {/* Bounding box principal */}
+      <Animated.View style={{
+        position: 'absolute',
+        left: bx - PAD, top: by - PAD,
+        width: bw + PAD * 2, height: bh + PAD * 2,
+        opacity: Animated.multiply(borderOpacity, glowAnim),
+        transform: [{ scale: scaleAnim }],
+        borderWidth: 2, borderColor: ORANGE, borderRadius: 5,
+        shadowColor: ORANGE, shadowRadius: 14, shadowOpacity: 1, shadowOffset: { width: 0, height: 0 },
+        backgroundColor: `rgba(204,120,92,0.06)`,
+      }}>
+        {/* Cantos de destaque */}
+        {[
+          { top: -2, left: -2,  borderTopWidth: 3, borderLeftWidth: 3  },
+          { top: -2, right: -2, borderTopWidth: 3, borderRightWidth: 3 },
+          { bottom: -2, left: -2,  borderBottomWidth: 3, borderLeftWidth: 3  },
+          { bottom: -2, right: -2, borderBottomWidth: 3, borderRightWidth: 3 },
+        ].map((s, i) => (
+          <View key={i} style={{ position: 'absolute', width: 14, height: 14, borderColor: CREAM, ...s }} />
+        ))}
+      </Animated.View>
+
+      {/* Label com marca detectada */}
+      <Animated.View style={{
+        position: 'absolute',
+        left: bx - PAD,
+        top: by - PAD - 30,
+        opacity: labelOpacity,
+        flexDirection: 'row', alignItems: 'center', gap: 6,
+      }}>
+        <View style={{ backgroundColor: ORANGE, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4 }}>
+          <Text style={{ color: '#fff', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 }}>
+            DETECTADO
+          </Text>
+        </View>
+        <Text style={{ color: CREAM, fontSize: 13, fontWeight: '700', letterSpacing: 1 }}>
+          {brand}
+        </Text>
+      </Animated.View>
+
+      {/* Linha conectora pontilhada embaixo */}
+      <Animated.View style={{
+        position: 'absolute',
+        left: bx - PAD,
+        top: by + bh + PAD,
+        opacity: labelOpacity,
+        backgroundColor: 'rgba(204,120,92,0.15)',
+        paddingHorizontal: 8, paddingVertical: 3,
+        borderRadius: 4, borderWidth: 1, borderColor: `rgba(204,120,92,0.35)`,
+      }}>
+        <Text style={{ color: ORANGE, fontSize: 9, fontWeight: '600', letterSpacing: 1 }}>
+          ◎ Claude Vision · OCR confirmado
+        </Text>
+      </Animated.View>
+    </View>
+  );
+}
+
 // ─── ScanOverlay ──────────────────────────────────────────────────────────────
 function ScanOverlay({ scanning, textDetecting, detected }) {
   const scanLine    = useRef(new Animated.Value(0)).current;
@@ -796,41 +930,80 @@ function ScanOverlay({ scanning, textDetecting, detected }) {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [permission, requestPermission] = useCameraPermissions();
+  const [analyzing,     setAnalyzing]     = useState(false);
   const [scanning,      setScanning]      = useState(false);
   const [textDetecting, setTextDetecting] = useState(false);
   const [detected,      setDetected]      = useState(false);
   const [showFloating,  setShowFloating]  = useState(false);
   const [showCard,      setShowCard]      = useState(false);
   const [showMap,       setShowMap]       = useState(false);
-  const timerRef = useRef(null);
+  const [brandBox,      setBrandBox]      = useState(null);
+  const [detectedBrand, setDetectedBrand] = useState('HUGGIES');
+  const cameraRef = useRef(null);
+  const timerRef  = useRef(null);
 
-  function handleScan() {
-    if (scanning || textDetecting || detected) return;
-    setScanning(true);
-    timerRef.current = setTimeout(() => {
-      setScanning(false);
+  function startVisualFlow(skipScan) {
+    if (skipScan) {
+      // Vai direto para reconhecimento (API já fez o trabalho)
       setTextDetecting(true);
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setTextDetecting(false);
         setDetected(true);
-        // Labels flutuantes aparecem 300ms após o glow
         setTimeout(() => {
           setShowFloating(true);
-          // Card sobe depois que o usuário viu todos os labels (1.8s)
-          setTimeout(() => {
-            setShowFloating(false);
-            setShowCard(true);
-          }, 1800);
+          setTimeout(() => { setShowFloating(false); setShowCard(true); }, 1800);
         }, 300);
-      }, 1900);
-    }, 2000);
+      }, 2000);
+    } else {
+      // Fluxo mock completo
+      setScanning(true);
+      timerRef.current = setTimeout(() => {
+        setScanning(false);
+        setTextDetecting(true);
+        setTimeout(() => {
+          setTextDetecting(false);
+          setDetected(true);
+          setTimeout(() => {
+            setShowFloating(true);
+            setTimeout(() => { setShowFloating(false); setShowCard(true); }, 1800);
+          }, 300);
+        }, 1900);
+      }, 2000);
+    }
+  }
+
+  async function handleScan() {
+    if (analyzing || scanning || textDetecting || detected) return;
+    if (!cameraRef.current) { startVisualFlow(false); return; }
+
+    setAnalyzing(true);
+    try {
+      const photo = await cameraRef.current.takePictureAsync({
+        base64: true, quality: 0.55, skipProcessing: true,
+      });
+      const result = await analyzeWithClaude(photo.base64);
+      setAnalyzing(false);
+      if (result.detected) {
+        setBrandBox(result.textBox);
+        setDetectedBrand(result.brand);
+        startVisualFlow(true);   // pula scan fake, vai direto para bounding box
+      } else {
+        setBrandBox(null);
+        startVisualFlow(false);  // produto não identificado → fluxo mock
+      }
+    } catch (err) {
+      setAnalyzing(false);
+      setBrandBox(null);
+      startVisualFlow(false);    // fallback mock em caso de erro de rede
+    }
   }
 
   function handleClose() {
     clearTimeout(timerRef.current);
     setShowCard(false); setShowFloating(false);
     setDetected(false); setScanning(false);
-    setTextDetecting(false);
+    setTextDetecting(false); setAnalyzing(false);
+    setBrandBox(null);
   }
 
   function handleSearchSimilar() {
@@ -855,21 +1028,36 @@ export default function App() {
     );
   }
 
-  const anyActive = scanning || textDetecting || detected;
+  const anyActive = analyzing || scanning || textDetecting || detected;
 
   return (
     <View style={styles.bg}>
       <StatusBar barStyle="light-content" />
-      <CameraView style={StyleSheet.absoluteFill} facing="back" />
+      <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="back" />
 
       <ScanOverlay scanning={scanning} textDetecting={textDetecting} detected={detected} />
-      <TextDetectionOverlay active={textDetecting} />
+
+      {/* Bounding box real do Claude (quando detectado) */}
+      <BrandBoundingBox textBox={brandBox} brand={detectedBrand} active={textDetecting && !!brandBox} />
+
+      {/* OCR mock animado (fallback sem detecção real) */}
+      <TextDetectionOverlay active={textDetecting && !brandBox} />
+
       <FloatingLabelsOverlay active={showFloating} />
 
+      {/* HUD */}
       <View style={styles.hud}>
         <Text style={styles.hudTitle}>◈ FRALDA SCANNER</Text>
         <View style={styles.hudDot} />
       </View>
+
+      {/* Indicador de análise IA */}
+      {analyzing && (
+        <View style={styles.analyzingBadge}>
+          <View style={styles.analyzingDot} />
+          <Text style={styles.analyzingText}>Claude Vision analisando...</Text>
+        </View>
+      )}
 
       {!showCard && !showMap && (
         <TouchableOpacity
@@ -877,7 +1065,11 @@ export default function App() {
           onPress={handleScan} activeOpacity={0.8}
         >
           <Text style={styles.scanBtnText}>
-            {scanning ? 'ANALISANDO...' : textDetecting ? 'RECONHECENDO...' : detected ? 'DETECTADO ✓' : 'ESCANEAR PRODUTO'}
+            {analyzing      ? 'IA ANALISANDO...'
+             : scanning      ? 'ANALISANDO...'
+             : textDetecting ? 'RECONHECENDO...'
+             : detected      ? 'DETECTADO ✓'
+             : 'ESCANEAR PRODUTO'}
           </Text>
         </TouchableOpacity>
       )}
@@ -947,6 +1139,19 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(15,13,11,0.82)', paddingHorizontal: 14, paddingVertical: 5,
     borderRadius: 20, borderWidth: 1, borderColor: BORDER,
   },
+
+  // Analyzing badge
+  analyzingBadge: {
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 88 : 100,
+    alignSelf: 'center',
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: 'rgba(15,13,11,0.88)',
+    paddingHorizontal: 16, paddingVertical: 8,
+    borderRadius: 20, borderWidth: 1, borderColor: BORDER,
+  },
+  analyzingDot:  { width: 7, height: 7, borderRadius: 4, backgroundColor: ORANGE },
+  analyzingText: { color: MUTED, fontSize: 12, fontWeight: '500', letterSpacing: 0.5 },
 
   // Floating labels
   floatPill: {
