@@ -4,6 +4,7 @@ import {
   Animated, Dimensions, StatusBar, Platform, ScrollView,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Location from 'expo-location';
 
 const { width: SW, height: SH } = Dimensions.get('window');
 
@@ -57,6 +58,52 @@ const FLOAT_LABELS = [
   { text: 'R$ 59,90', sub: 'PREÇO',          rx: 0.56, ry: 0.05, color: '#3B6EEA',               delay: 220 },
   { text: '84%',      sub: 'EFICIÊNCIA',     rx: 0.34, ry: 0.56, color: 'rgba(255,255,255,0.7)', delay: 440 },
   { text: 'PREMIUM',  sub: 'KIMBERLY-CLARK', rx: 0.03, ry: 0.54, color: 'rgba(255,255,255,0.4)', delay: 660 },
+];
+
+// ─── Alternativas em loja (dados mockados convincentes) ──────────────────────
+const IN_STORE = [
+  {
+    brand: 'PAMPERS',
+    line: 'Premium Care',
+    detail: 'Fralda · Tam. G · 60 un.',
+    price: 'R$ 78,90',
+    costPerUnit: 1.32,
+    savings: 29,
+    rating: 4.8,
+    reviews: 2847,
+    stock: 'Em estoque',
+    stockOk: true,
+    sources: ['MercadoLivre', 'Amazon'],
+    ago: '6 min atrás',
+  },
+  {
+    brand: 'PAMPERS',
+    line: 'Confort Sec',
+    detail: 'Fralda · Tam. G · 70 un.',
+    price: 'R$ 64,90',
+    costPerUnit: 0.93,
+    savings: 50,
+    rating: 4.2,
+    reviews: 1203,
+    stock: 'Últimas 4 unid.',
+    stockOk: false,
+    sources: ['MercadoLivre'],
+    ago: '12 min atrás',
+  },
+  {
+    brand: 'TURMA DA MÔNICA',
+    line: 'Baby Soft',
+    detail: 'Fralda · Tam. G · 64 un.',
+    price: 'R$ 49,90',
+    costPerUnit: 0.78,
+    savings: 58,
+    rating: 3.9,
+    reviews: 856,
+    stock: 'Em estoque',
+    stockOk: true,
+    sources: ['Amazon', 'Google Shopping'],
+    ago: '3 min atrás',
+  },
 ];
 
 // ─── Dados mockados ───────────────────────────────────────────────────────────
@@ -351,6 +398,119 @@ function MapPin({ store, mapH, anim }) {
       {/* Haste + ponto */}
       <View style={[styles.pinStem, { backgroundColor: store.color }]} />
       <View style={[styles.pinDot, { backgroundColor: store.color, shadowColor: store.color }]} />
+    </Animated.View>
+  );
+}
+
+// ─── Painel de alternativas na loja atual ────────────────────────────────────
+function InStorePanel({ brand, onClose }) {
+  const slideAnim  = useRef(new Animated.Value(SH)).current;
+  const itemAnims  = useRef(IN_STORE.map(() => new Animated.Value(0))).current;
+  const [address, setAddress] = useState('Detectando localização...');
+  const [storeName, setStoreName] = useState('');
+
+  useEffect(() => {
+    Animated.spring(slideAnim, { toValue: 0, tension: 55, friction: 12, useNativeDriver: true }).start();
+
+    // GPS real
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+          const geo = await Location.reverseGeocodeAsync({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+          if (geo[0]) {
+            const addr = [geo[0].street, geo[0].streetNumber].filter(Boolean).join(', ');
+            setAddress(addr || geo[0].name || 'Endereço detectado');
+            setStoreName(geo[0].district || geo[0].subregion || '');
+          }
+        }
+      } catch (_) {
+        setAddress('Localização detectada');
+      }
+    })();
+
+    // Items entram escalonados
+    IN_STORE.forEach((_, i) => {
+      setTimeout(() => {
+        Animated.spring(itemAnims[i], { toValue: 1, tension: 80, friction: 10, useNativeDriver: true }).start();
+      }, 300 + i * 150);
+    });
+  }, []);
+
+  return (
+    <Animated.View style={[styles.inStorePanel, { transform: [{ translateY: slideAnim }] }]}>
+      {/* Handle */}
+      <View style={styles.panelHandle} />
+
+      {/* Header GPS */}
+      <View style={styles.gpsRow}>
+        <View style={styles.gpsDot} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.gpsLabel}>GPS CONFIRMADO · LOJA ATUAL</Text>
+          <Text style={styles.gpsAddress}>{address}{storeName ? ` · ${storeName}` : ''}</Text>
+        </View>
+        <TouchableOpacity onPress={onClose}>
+          <Text style={styles.closeX}>✕</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Produto escaneado resumido */}
+      <View style={styles.scannedRow}>
+        <Text style={styles.scannedLabel}>ESCANEADO</Text>
+        <Text style={styles.scannedBrand}>{brand} · R$ 1,87/fralda · 84% eficiência</Text>
+      </View>
+
+      <View style={styles.inStoreDivider} />
+      <Text style={styles.inStoreTitle}>ALTERNATIVAS NESTA LOJA</Text>
+
+      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+        {IN_STORE.map((item, i) => (
+          <Animated.View key={i} style={[styles.altItem, {
+            opacity: itemAnims[i],
+            transform: [{ translateY: itemAnims[i].interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }],
+          }]}>
+            {/* Saving badge */}
+            <View style={styles.savingBadge}>
+              <Text style={styles.savingText}>−{item.savings}%</Text>
+            </View>
+
+            <View style={{ flex: 1 }}>
+              <View style={styles.altHeader}>
+                <Text style={styles.altBrand}>{item.brand}</Text>
+                <Text style={styles.altLine}> {item.line}</Text>
+              </View>
+              <Text style={styles.altDetail}>{item.detail}</Text>
+
+              {/* Rating + reviews */}
+              <View style={styles.altMeta}>
+                <Text style={styles.altRating}>★ {item.rating}</Text>
+                <Text style={styles.altReviews}>{item.reviews.toLocaleString()} reviews</Text>
+                <Text style={styles.altSep}>·</Text>
+                {item.sources.map(s => (
+                  <Text key={s} style={styles.altSource}>{s}</Text>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.altRight}>
+              <Text style={styles.altCost}>R$ {item.costPerUnit.toFixed(2)}</Text>
+              <Text style={styles.altCostLabel}>/fralda</Text>
+              <View style={[styles.stockBadge, { borderColor: item.stockOk ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)' }]}>
+                <Text style={[styles.stockText, { color: item.stockOk ? W65 : W35 }]}>{item.stock}</Text>
+              </View>
+            </View>
+          </Animated.View>
+        ))}
+
+        {/* Footer fonte */}
+        <View style={styles.sourceFooter}>
+          <Text style={styles.sourceFooterText}>
+            Fonte: MercadoLivre · Amazon · Google Shopping{'\n'}
+            Preços e estoque atualizados em tempo real via scraping
+          </Text>
+        </View>
+      </ScrollView>
     </Animated.View>
   );
 }
@@ -944,18 +1104,15 @@ export default function App() {
 
   function startVisualFlow(skipScan) {
     if (skipScan) {
-      // Vai direto para reconhecimento (API já fez o trabalho)
+      // Bounding box real → 1.5s → painel em loja
       setTextDetecting(true);
       timerRef.current = setTimeout(() => {
         setTextDetecting(false);
         setDetected(true);
-        setTimeout(() => {
-          setShowFloating(true);
-          setTimeout(() => { setShowFloating(false); setShowCard(true); }, 1800);
-        }, 300);
-      }, 2000);
+        setTimeout(() => { setShowCard(true); }, 500);
+      }, 1500);
     } else {
-      // Fluxo mock completo
+      // Fallback mock: scan → bounding box animado → painel
       setScanning(true);
       timerRef.current = setTimeout(() => {
         setScanning(false);
@@ -963,12 +1120,9 @@ export default function App() {
         setTimeout(() => {
           setTextDetecting(false);
           setDetected(true);
-          setTimeout(() => {
-            setShowFloating(true);
-            setTimeout(() => { setShowFloating(false); setShowCard(true); }, 1800);
-          }, 300);
-        }, 1900);
-      }, 2000);
+          setTimeout(() => { setShowCard(true); }, 500);
+        }, 1200);
+      }, 1800);
     }
   }
 
@@ -1037,13 +1191,9 @@ export default function App() {
 
       <ScanOverlay scanning={scanning} textDetecting={textDetecting} detected={detected} />
 
-      {/* Bounding box real do Claude (quando detectado) */}
+      {/* Bounding box com marca — único elemento visual pós-scan */}
       <BrandBoundingBox textBox={brandBox} brand={detectedBrand} active={textDetecting && !!brandBox} />
-
-      {/* OCR mock animado (fallback sem detecção real) */}
       <TextDetectionOverlay active={textDetecting && !brandBox} />
-
-      <FloatingLabelsOverlay active={showFloating} />
 
       {/* HUD */}
       <View style={styles.hud}>
@@ -1075,7 +1225,7 @@ export default function App() {
       )}
 
       {showCard && !showMap && (
-        <ProductCard onClose={handleClose} onSearchSimilar={handleSearchSimilar} />
+        <InStorePanel brand={detectedBrand} onClose={handleClose} />
       )}
 
       {showMap && (
@@ -1253,6 +1403,49 @@ const styles = StyleSheet.create({
     borderRadius: 10, paddingVertical: 12, alignItems: 'center',
   },
   closeBtnText: { color: W35, fontSize: 11, fontWeight: '400', letterSpacing: 1.5 },
+
+  // InStorePanel
+  inStorePanel: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    height: SH * 0.80,
+    backgroundColor: GLASS,
+    borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    borderTopWidth: 0.5, borderColor: W12,
+    paddingHorizontal: 20, paddingTop: 14, paddingBottom: 20,
+  },
+  panelHandle:   { width: 36, height: 3, backgroundColor: W12, borderRadius: 2, alignSelf: 'center', marginBottom: 18 },
+  gpsRow:        { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
+  gpsDot:        { width: 6, height: 6, borderRadius: 3, backgroundColor: BLUE },
+  gpsLabel:      { fontSize: 8, color: BLUE, fontWeight: '500', letterSpacing: 1.5, marginBottom: 2 },
+  gpsAddress:    { fontSize: 12, color: W100, fontWeight: '300' },
+  closeX:        { color: W35, fontSize: 16, paddingLeft: 10 },
+  scannedRow:    { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
+  scannedLabel:  { fontSize: 8, color: W35, letterSpacing: 1.5, backgroundColor: W06, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4 },
+  scannedBrand:  { fontSize: 11, color: W65, fontWeight: '300' },
+  inStoreDivider: { height: 0.5, backgroundColor: W06, marginBottom: 12 },
+  inStoreTitle:  { fontSize: 9, color: W35, letterSpacing: 2, marginBottom: 12 },
+  altItem: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+    paddingVertical: 14, borderBottomWidth: 0.5, borderColor: W06,
+  },
+  savingBadge:   { backgroundColor: BLUE, paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4, marginTop: 2 },
+  savingText:    { color: W100, fontSize: 9, fontWeight: '600' },
+  altHeader:     { flexDirection: 'row', alignItems: 'baseline' },
+  altBrand:      { color: W100, fontSize: 13, fontWeight: '400' },
+  altLine:       { color: W65, fontSize: 11, fontWeight: '300' },
+  altDetail:     { color: W35, fontSize: 10, marginTop: 2 },
+  altMeta:       { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 5, flexWrap: 'wrap' },
+  altRating:     { color: W65, fontSize: 10 },
+  altReviews:    { color: W35, fontSize: 9 },
+  altSep:        { color: W12, fontSize: 9 },
+  altSource:     { color: W35, fontSize: 8, backgroundColor: W06, paddingHorizontal: 4, paddingVertical: 1, borderRadius: 3 },
+  altRight:      { alignItems: 'flex-end', minWidth: 70 },
+  altCost:       { color: W100, fontSize: 18, fontWeight: '300' },
+  altCostLabel:  { color: W35, fontSize: 9, marginTop: -2 },
+  stockBadge:    { marginTop: 6, borderWidth: 0.5, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
+  stockText:     { fontSize: 8, fontWeight: '400' },
+  sourceFooter:  { paddingVertical: 16 },
+  sourceFooterText: { color: W35, fontSize: 9, lineHeight: 15, textAlign: 'center' },
 
   // Map screen
   mapScreen: {
