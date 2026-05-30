@@ -53,10 +53,10 @@ async function analyzeWithClaude(base64) {
 
 // ─── Labels flutuantes sobre o produto (padrão Cal AI) ───────────────────────
 const FLOAT_LABELS = [
-  { text: 'HUGGIES',   sub: 'Supreme Care',    rx: 0.03, ry: 0.05, color: '#CC785C', delay: 0   },
-  { text: 'R$ 59,90',  sub: 'PREÇO ATUAL',      rx: 0.56, ry: 0.05, color: '#6B8FBF', delay: 220 },
-  { text: '84%',       sub: 'EFICIÊNCIA',        rx: 0.34, ry: 0.56, color: '#5C9E77', delay: 440 },
-  { text: 'PREMIUM',   sub: 'FRALDA DESC.',      rx: 0.03, ry: 0.54, color: '#C9973A', delay: 660 },
+  { text: 'HUGGIES',  sub: 'Supreme Care',   rx: 0.03, ry: 0.05, color: '#FFFFFF',               delay: 0   },
+  { text: 'R$ 59,90', sub: 'PREÇO',          rx: 0.56, ry: 0.05, color: '#3B6EEA',               delay: 220 },
+  { text: '84%',      sub: 'EFICIÊNCIA',     rx: 0.34, ry: 0.56, color: 'rgba(255,255,255,0.7)', delay: 440 },
+  { text: 'PREMIUM',  sub: 'KIMBERLY-CLARK', rx: 0.03, ry: 0.54, color: 'rgba(255,255,255,0.4)', delay: 660 },
 ];
 
 // ─── Dados mockados ───────────────────────────────────────────────────────────
@@ -64,13 +64,13 @@ const PRODUCT = {
   brand: 'HUGGIES',
   line: 'Supreme Care',
   type: 'FRALDA DESCARTÁVEL',
-  rarity: 'PREMIUM',
-  rarityColor: '#C9973A',
+  rarity: 'KIMBERLY-CLARK',
+  rarityColor: 'rgba(255,255,255,0.4)',
   stats: [
-    { label: 'Absorção',        value: 94, color: '#6B8FBF' },
-    { label: 'Maciez',          value: 88, color: '#A88CBF' },
-    { label: 'Ajuste',          value: 85, color: '#5C9E77' },
-    { label: 'Custo-Benefício', value: 76, color: '#CC785C' },
+    { label: 'Absorção',        value: 94, color: '#3B6EEA' },
+    { label: 'Maciez',          value: 88, color: 'rgba(255,255,255,0.65)' },
+    { label: 'Ajuste',          value: 85, color: 'rgba(255,255,255,0.5)' },
+    { label: 'Custo-Benefício', value: 76, color: 'rgba(255,255,255,0.35)' },
   ],
   efficiency: 84,
   price: 'R$ 59,90',
@@ -86,7 +86,7 @@ const NEARBY = [
     efficiency: 91,
     isBest: false,
     px: 0.68, py: 0.28,
-    color: '#6B8FBF',
+    color: 'rgba(255,255,255,0.6)',
   },
   {
     name: 'Carrefour',
@@ -97,7 +97,7 @@ const NEARBY = [
     efficiency: 93,
     isBest: true,
     px: 0.22, py: 0.48,
-    color: '#5C9E77',
+    color: '#3B6EEA',
   },
   {
     name: 'Assaí Atacadista',
@@ -108,7 +108,7 @@ const NEARBY = [
     efficiency: 86,
     isBest: false,
     px: 0.74, py: 0.63,
-    color: '#A88CBF',
+    color: 'rgba(255,255,255,0.45)',
   },
 ];
 
@@ -208,7 +208,7 @@ function ProductCard({ onClose, onSearchSimilar }) {
 
   const effColor = effAnim.interpolate({
     inputRange: [0, 0.5, 0.75, 1],
-    outputRange: ['#8B3A2A', '#CC785C', '#C9973A', '#5C9E77'],
+    outputRange: ['rgba(59,110,234,0.3)', 'rgba(59,110,234,0.55)', 'rgba(59,110,234,0.78)', '#3B6EEA'],
   });
 
   return (
@@ -1047,7 +1047,7 @@ export default function App() {
 
       {/* HUD */}
       <View style={styles.hud}>
-        <Text style={styles.hudTitle}>◈ FRALDA SCANNER</Text>
+        <Text style={styles.hudTitle}>⊙—⊙  LENS</Text>
         <View style={styles.hudDot} />
       </View>
 
@@ -1086,24 +1086,33 @@ export default function App() {
 }
 
 // ─── Estilos ──────────────────────────────────────────────────────────────────
-// Anthropic design system — warm, precise, trustworthy
-const ORANGE  = '#CC785C';   // primary — Anthropic signature
-const AMBER   = '#C9973A';   // secondary warm accent
-const CREAM   = '#E8E0D5';   // primary text
-const MUTED   = '#8C8279';   // secondary text
-const BG      = '#0F0D0B';   // deepest background
-const SURFACE = '#1A1714';   // card surface
-const SURFACE2= '#231F1B';   // elevated surface
-const BORDER  = '#2D2825';   // subtle border
-const SUCCESS = '#5C9E77';   // muted green
-const INFO    = '#6B8FBF';   // muted blue
-const PURPLE  = '#A88CBF';   // soft purple
-// aliases para manter compatibilidade com usos inline
-const NEON    = ORANGE;
-const GOLD    = AMBER;
-const GREEN   = SUCCESS;
-const DARK    = BG;
-const CARD    = SURFACE;
+// IbovLens × Spatial Computing — black, white, blue. Nothing else.
+const BLUE    = '#3B6EEA';                    // IbovLens accent — único color
+const W100    = '#FFFFFF';                    // texto primário
+const W65     = 'rgba(255,255,255,0.65)';     // texto secundário
+const W35     = 'rgba(255,255,255,0.35)';     // texto terciário
+const W12     = 'rgba(255,255,255,0.12)';     // bordas / divisores
+const W06     = 'rgba(255,255,255,0.06)';     // superfícies elevadas
+const GLASS   = 'rgba(8,8,8,0.88)';          // frosted glass panel
+const GLASS2  = 'rgba(12,12,12,0.95)';       // elevated glass
+const SCAN_L  = 'rgba(255,255,255,0.22)';    // scan line / cantos
+// aliases para compatibilidade com referências inline existentes
+const ORANGE  = BLUE;
+const AMBER   = W65;
+const CREAM   = W100;
+const MUTED   = W35;
+const BG      = '#000000';
+const SURFACE = GLASS;
+const SURFACE2= GLASS2;
+const BORDER  = W12;
+const SUCCESS = W65;
+const INFO    = BLUE;
+const PURPLE  = W35;
+const NEON    = BLUE;
+const GOLD    = W65;
+const GREEN   = W65;
+const DARK    = '#000000';
+const CARD    = GLASS;
 
 const styles = StyleSheet.create({
   bg:          { flex: 1, backgroundColor: '#000' },
@@ -1114,30 +1123,27 @@ const styles = StyleSheet.create({
 
   hud: {
     position: 'absolute', top: Platform.OS === 'android' ? 44 : 56,
-    left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8,
+    left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6,
   },
-  hudTitle: { color: CREAM, fontSize: 12, fontWeight: '600', letterSpacing: 2, opacity: 0.9 },
-  hudDot:   { width: 6, height: 6, borderRadius: 3, backgroundColor: ORANGE },
+  hudTitle: { color: W65, fontSize: 11, fontWeight: '300', letterSpacing: 3 },
+  hudDot:   { width: 5, height: 5, borderRadius: 3, backgroundColor: BLUE },
 
-  shade: { position: 'absolute', backgroundColor: 'rgba(0,0,0,0.60)' },
+  // Spatial scan overlay — hairline geometry
+  shade: { position: 'absolute', backgroundColor: 'rgba(0,0,0,0.50)' },
   detectedBorder: {
-    position: 'absolute', borderWidth: 1.5, borderColor: ORANGE, borderRadius: 6,
-    shadowColor: ORANGE, shadowRadius: 16, shadowOpacity: 0.5, shadowOffset: { width: 0, height: 0 },
+    position: 'absolute', borderWidth: 1, borderColor: SCAN_L, borderRadius: 2,
   },
-  corner:   { position: 'absolute', width: 22, height: 22 },
-  cornerTL: { borderTopWidth: 2.5, borderLeftWidth: 2.5,   borderColor: ORANGE, borderTopLeftRadius: 3 },
-  cornerTR: { borderTopWidth: 2.5, borderRightWidth: 2.5,  borderColor: ORANGE, borderTopRightRadius: 3 },
-  cornerBL: { borderBottomWidth: 2.5, borderLeftWidth: 2.5,  borderColor: ORANGE, borderBottomLeftRadius: 3 },
-  cornerBR: { borderBottomWidth: 2.5, borderRightWidth: 2.5, borderColor: ORANGE, borderBottomRightRadius: 3 },
-  scanLine: {
-    position: 'absolute', height: 1.5, backgroundColor: ORANGE, opacity: 0.7,
-    shadowColor: ORANGE, shadowRadius: 8, shadowOpacity: 0.8,
-  },
-  scanLabel:     { position: 'absolute', alignItems: 'center' },
+  corner:   { position: 'absolute', width: 18, height: 18 },
+  cornerTL: { borderTopWidth: 1, borderLeftWidth: 1,   borderColor: W100 },
+  cornerTR: { borderTopWidth: 1, borderRightWidth: 1,  borderColor: W100 },
+  cornerBL: { borderBottomWidth: 1, borderLeftWidth: 1,  borderColor: W100 },
+  cornerBR: { borderBottomWidth: 1, borderRightWidth: 1, borderColor: W100 },
+  scanLine: { position: 'absolute', height: 1, backgroundColor: W100, opacity: 0.25 },
+  scanLabel: { position: 'absolute', alignItems: 'center' },
   scanLabelText: {
-    color: CREAM, fontSize: 11, fontWeight: '600', letterSpacing: 1.5,
-    backgroundColor: 'rgba(15,13,11,0.82)', paddingHorizontal: 14, paddingVertical: 5,
-    borderRadius: 20, borderWidth: 1, borderColor: BORDER,
+    color: W65, fontSize: 10, fontWeight: '400', letterSpacing: 2,
+    backgroundColor: 'rgba(0,0,0,0.70)', paddingHorizontal: 12, paddingVertical: 4,
+    borderRadius: 20, borderWidth: 0.5, borderColor: W12,
   },
 
   // Analyzing badge
@@ -1146,36 +1152,34 @@ const styles = StyleSheet.create({
     top: Platform.OS === 'android' ? 88 : 100,
     alignSelf: 'center',
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: 'rgba(15,13,11,0.88)',
+    backgroundColor: 'rgba(0,0,0,0.75)',
     paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, borderWidth: 1, borderColor: BORDER,
+    borderRadius: 20, borderWidth: 0.5, borderColor: W12,
   },
-  analyzingDot:  { width: 7, height: 7, borderRadius: 4, backgroundColor: ORANGE },
-  analyzingText: { color: MUTED, fontSize: 12, fontWeight: '500', letterSpacing: 0.5 },
+  analyzingDot:  { width: 6, height: 6, borderRadius: 3, backgroundColor: BLUE },
+  analyzingText: { color: W65, fontSize: 11, fontWeight: '400', letterSpacing: 1 },
 
-  // Floating labels
+  // Floating labels — spatial, minimal
   floatPill: {
-    backgroundColor: 'rgba(8, 12, 24, 0.92)',
-    borderWidth: 1.5, borderRadius: 10,
-    paddingHorizontal: 10, paddingVertical: 6,
-    shadowRadius: 10, shadowOpacity: 0.7, shadowOffset: { width: 0, height: 0 },
+    backgroundColor: 'rgba(0,0,0,0.80)',
+    borderWidth: 0.5, borderRadius: 8,
+    paddingHorizontal: 10, paddingVertical: 5,
   },
-  floatMain: { fontSize: 15, fontWeight: '900', letterSpacing: 1 },
-  floatSub:  { fontSize: 8,  color: '#6B7FA3', fontWeight: '700', letterSpacing: 0.5, marginTop: 1 },
+  floatMain: { fontSize: 14, fontWeight: '500', letterSpacing: 0.5 },
+  floatSub:  { fontSize: 8, color: W35, fontWeight: '400', letterSpacing: 1, marginTop: 1 },
 
-  // OCR overlay — warm amber tones
-  crosshair: { position: 'absolute', width: 30, height: 30 },
-  chLineH:   { position: 'absolute', top: 14, left: 0, right: 0, height: 1.5, backgroundColor: AMBER, opacity: 0.8 },
-  chLineV:   { position: 'absolute', left: 14, top: 0, bottom: 0, width: 1.5, backgroundColor: AMBER, opacity: 0.8 },
-  chC:       { position: 'absolute', width: 9, height: 9 },
-  chTL:      { top: 0, left: 0,   borderTopWidth: 2, borderLeftWidth: 2,   borderColor: AMBER },
-  chTR:      { top: 0, right: 0,  borderTopWidth: 2, borderRightWidth: 2,  borderColor: AMBER },
-  chBL:      { bottom: 0, left: 0,  borderBottomWidth: 2, borderLeftWidth: 2,  borderColor: AMBER },
-  chBR:      { bottom: 0, right: 0, borderBottomWidth: 2, borderRightWidth: 2, borderColor: AMBER },
+  // OCR overlay — white hairline
+  crosshair: { position: 'absolute', width: 28, height: 28 },
+  chLineH:   { position: 'absolute', top: 13, left: 0, right: 0, height: 0.5, backgroundColor: W100, opacity: 0.6 },
+  chLineV:   { position: 'absolute', left: 13, top: 0, bottom: 0, width: 0.5, backgroundColor: W100, opacity: 0.6 },
+  chC:       { position: 'absolute', width: 8, height: 8 },
+  chTL:      { top: 0, left: 0,   borderTopWidth: 1, borderLeftWidth: 1,   borderColor: W100 },
+  chTR:      { top: 0, right: 0,  borderTopWidth: 1, borderRightWidth: 1,  borderColor: W100 },
+  chBL:      { bottom: 0, left: 0,  borderBottomWidth: 1, borderLeftWidth: 1,  borderColor: W100 },
+  chBR:      { bottom: 0, right: 0, borderBottomWidth: 1, borderRightWidth: 1, borderColor: W100 },
   detectBox: {
-    position: 'absolute', borderWidth: 1, borderColor: AMBER, borderRadius: 4,
-    backgroundColor: 'rgba(201,151,58,0.06)',
-    shadowColor: AMBER, shadowRadius: 8, shadowOpacity: 0.35, shadowOffset: { width: 0, height: 0 },
+    position: 'absolute', borderWidth: 0.5, borderColor: W65, borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.03)',
   },
   dCorner: { position: 'absolute', width: 10, height: 10 },
   dTL:     { top: -1, left: -1,   borderTopWidth: 2, borderLeftWidth: 2,   borderColor: AMBER },
@@ -1193,62 +1197,62 @@ const styles = StyleSheet.create({
   },
   confText: { color: AMBER, fontSize: 9, fontWeight: '600', letterSpacing: 1 },
 
-  // Scan button
+  // Scan button — ghost, spatial
   scanBtn: {
     position: 'absolute', bottom: 52, alignSelf: 'center',
-    borderWidth: 1.5, borderColor: 'rgba(232,224,213,0.35)',
-    paddingHorizontal: 40, paddingVertical: 16, borderRadius: 50,
-    backgroundColor: 'rgba(15,13,11,0.72)',
+    borderWidth: 0.5, borderColor: W35,
+    paddingHorizontal: 40, paddingVertical: 15, borderRadius: 50,
+    backgroundColor: 'rgba(0,0,0,0.55)',
   },
-  scanBtnActive: { borderColor: ORANGE, backgroundColor: 'rgba(204,120,92,0.15)' },
-  scanBtnText:   { color: CREAM, fontWeight: '600', fontSize: 13, letterSpacing: 1.5 },
+  scanBtnActive: { borderColor: BLUE, backgroundColor: 'rgba(59,110,234,0.10)' },
+  scanBtnText:   { color: W65, fontWeight: '300', fontSize: 12, letterSpacing: 2.5 },
 
-  // Card
+  // Card — frosted glass, minimal
   cardWrapper: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     maxHeight: SH * 0.76,
-    backgroundColor: SURFACE, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    borderTopWidth: 1, borderColor: BORDER,
-    paddingHorizontal: 20, paddingTop: 20, paddingBottom: 36,
-    shadowColor: '#000', shadowRadius: 24, shadowOpacity: 0.5, shadowOffset: { width: 0, height: -4 },
+    backgroundColor: GLASS, borderTopLeftRadius: 16, borderTopRightRadius: 16,
+    borderTopWidth: 0.5, borderColor: W12,
+    paddingHorizontal: 24, paddingTop: 24, paddingBottom: 36,
   },
   cardHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  cardRarity:  { fontSize: 9, fontWeight: '700', letterSpacing: 1.5, marginBottom: 4, textTransform: 'uppercase' },
-  cardBrand:   { fontSize: 26, fontWeight: '700', color: CREAM, letterSpacing: 0.5 },
-  cardLine:    { fontSize: 12, color: MUTED, letterSpacing: 0.3, marginTop: 3 },
+  cardRarity:  { fontSize: 9, fontWeight: '400', color: W35, letterSpacing: 2, marginBottom: 6 },
+  cardBrand:   { fontSize: 28, fontWeight: '300', color: W100, letterSpacing: -0.5 },
+  cardLine:    { fontSize: 11, color: W35, letterSpacing: 0.5, marginTop: 4 },
   priceTag:    { alignItems: 'flex-end' },
-  priceLabel:  { fontSize: 9, color: MUTED, letterSpacing: 1, textTransform: 'uppercase' },
-  priceValue:  { fontSize: 22, fontWeight: '700', color: CREAM },
-  divider:     { height: 1, backgroundColor: BORDER, marginVertical: 14 },
-  statsSection: { gap: 12 },
-  statRow:     { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  statLabel:   { width: 110, fontSize: 11, color: MUTED, fontWeight: '500' },
-  statTrack:   { flex: 1, height: 6, backgroundColor: BORDER, borderRadius: 3, overflow: 'hidden' },
-  statFill:    { height: '100%', borderRadius: 3 },
-  statGlow:    { ...StyleSheet.absoluteFillObject, shadowRadius: 4, shadowOpacity: 0.4, shadowOffset: { width: 0, height: 0 } },
-  statValue:   { width: 28, fontSize: 12, fontWeight: '700', textAlign: 'right' },
-  effSection:  { marginTop: 4 },
+  priceLabel:  { fontSize: 9, color: W35, letterSpacing: 1.5 },
+  priceValue:  { fontSize: 24, fontWeight: '300', color: W100 },
+  divider:     { height: 0.5, backgroundColor: W06, marginVertical: 16 },
+  statsSection: { gap: 14 },
+  statRow:     { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  statLabel:   { width: 110, fontSize: 10, color: W35, fontWeight: '400', letterSpacing: 0.5 },
+  statTrack:   { flex: 1, height: 2, backgroundColor: W06, borderRadius: 1, overflow: 'hidden' },
+  statFill:    { height: '100%', borderRadius: 1 },
+  statGlow:    { ...StyleSheet.absoluteFillObject },
+  statValue:   { width: 28, fontSize: 11, fontWeight: '400', textAlign: 'right', color: W65 },
+  effSection:  { marginTop: 8 },
   effHeader:   { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  effTitle:    { fontSize: 10, color: MUTED, fontWeight: '600', letterSpacing: 1, textTransform: 'uppercase' },
-  effPercent:  { fontSize: 13, color: CREAM, fontWeight: '700' },
-  effTrack:    { height: 10, backgroundColor: BORDER, borderRadius: 5, overflow: 'hidden' },
-  effFill:     { height: '100%', borderRadius: 5 },
-  effSegment:  { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: 'rgba(0,0,0,0.3)' },
+  effTitle:    { fontSize: 9, color: W35, fontWeight: '400', letterSpacing: 2 },
+  effPercent:  { fontSize: 11, color: W65, fontWeight: '400' },
+  effTrack:    { height: 3, backgroundColor: W06, borderRadius: 2, overflow: 'hidden' },
+  effFill:     { height: '100%', borderRadius: 2 },
+  effSegment:  { display: 'none' },
 
-  // Botão buscar similares
+  // Botão buscar similares — ghost azul
   searchBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
-    backgroundColor: ORANGE,
-    borderRadius: 12, paddingVertical: 14, paddingHorizontal: 20,
+    borderWidth: 0.5, borderColor: BLUE,
+    borderRadius: 10, paddingVertical: 13, paddingHorizontal: 20,
+    backgroundColor: 'rgba(59,110,234,0.08)',
   },
-  searchBtnIcon: { color: '#fff', fontSize: 16 },
-  searchBtnText: { color: '#fff', fontWeight: '700', fontSize: 13, letterSpacing: 0.5 },
+  searchBtnIcon: { color: BLUE, fontSize: 14 },
+  searchBtnText: { color: BLUE, fontWeight: '400', fontSize: 12, letterSpacing: 1.5 },
 
   closeBtn: {
-    marginTop: 12, borderWidth: 1, borderColor: BORDER,
+    marginTop: 12, borderWidth: 0.5, borderColor: W06,
     borderRadius: 10, paddingVertical: 12, alignItems: 'center',
   },
-  closeBtnText: { color: MUTED, fontSize: 12, fontWeight: '500', letterSpacing: 1 },
+  closeBtnText: { color: W35, fontSize: 11, fontWeight: '400', letterSpacing: 1.5 },
 
   // Map screen
   mapScreen: {
